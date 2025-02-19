@@ -1,10 +1,10 @@
 package com.herbalcalendar.repository;
 
-import com.herbalcalendar.model.Herb;
+import com.herbalcalendar.model.HerbModel;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
 @Repository
-public interface HerbRepository extends JpaRepository<Herb, Long> {
+public interface HerbRepository extends JpaRepository<HerbModel, Long> {
 }
