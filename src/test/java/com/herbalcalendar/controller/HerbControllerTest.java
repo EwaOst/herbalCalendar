@@ -101,12 +101,13 @@ class HerbControllerTest {
                 .andExpect(status().isNotFound());
 
     }
+
     @Test
-    void deleteHerb_ShouldDeleteWithProvidedId() throws Exception{
+    void deleteHerb_ShouldDeleteWithProvidedId() throws Exception {
         Long herbId = 1L;
         doNothing().when(herbService).deleteHerb(any(Long.class));
         mockMvc.perform(delete("/herbs/{id}", herbId)
-                .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
 }

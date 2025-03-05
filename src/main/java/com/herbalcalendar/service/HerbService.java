@@ -44,7 +44,7 @@ public class HerbService {
                     herb.setHarvestTime(updateHerb.getHarvestTime());
                     return herbRepository.save(herb);
                 })
-                .orElseThrow(() -> new RuntimeException("Goal do not exists")));
+                .orElseThrow(() -> new RuntimeException("Herb do not exists")));
     }
 
 

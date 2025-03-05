@@ -13,21 +13,30 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/herbs")
+@RequestMapping("/herbs")
 public class HerbController {
 
-
+    @Autowired
     private HerbService herbService;
 
     @GetMapping
-    public List<HerbModel> getAllHerbs() {
-        return herbService.getAllHerbs();
+    public ResponseEntity<List<HerbModel>> getAllHerbs() {
+        List<HerbModel> herbs = herbService.getAllHerbs();
+        return ResponseEntity.ok(herbs);
     }
 
     @PostMapping
     public ResponseEntity<HerbModel> createHerb(@Valid @RequestBody HerbModel herbModel) {
         HerbModel newHerb = herbService.createHerb(herbModel);
         return new ResponseEntity<>(newHerb, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<HerbModel> updateHerb(@PathVariable Long id, @RequestBody HerbModel herb) {
+        return herbService.updateHerb(id, herb)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound()
+                        .build());
     }
 
     @GetMapping("/{id}")
@@ -38,18 +47,10 @@ public class HerbController {
 
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateHerb(@PathVariable Long id, @RequestBody HerbModel herb) {
-        return herbService.updateHerb(id, herb)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound()
-                        .build());
-    }
-
-   @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteHerb (@PathVariable Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteHerb(@PathVariable Long id) {
         herbService.deleteHerb(id);
-            return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build();
     }
 }
 
