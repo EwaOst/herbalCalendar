@@ -43,14 +43,16 @@ public class HerbController {
     public ResponseEntity<HerbModel> getHerbById(@PathVariable Long id) {
         return herbService.getHerbById(id)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.notFound()
+                        .build());
 
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteHerb(@PathVariable Long id) {
         herbService.deleteHerb(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent()
+                .build();
     }
 }
 
