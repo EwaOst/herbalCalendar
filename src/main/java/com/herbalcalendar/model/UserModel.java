@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -19,9 +20,22 @@ public class UserModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LocationModel> locations = new ArrayList<>();
+    @Column(name = "USERNAME", unique = true, nullable = false)
+    private String username;
 
-    // getters and setters
+    @Column(name = "EMAIL", unique = true, nullable = false)
+    private String email;
+
+    @Column(name = "PASSWORD", nullable = false)
+    private String password;
+
+    @Column(name = "IS_ACTIVE")
+    private boolean isActive = true;
+
+    @Column(name = "CREATED_AT", updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt = new Date();
+
+    @ManyToMany(mappedBy = "users")
+    private List<HerbModel> herbs;
 }
- 

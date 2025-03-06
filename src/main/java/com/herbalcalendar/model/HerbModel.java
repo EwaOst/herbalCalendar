@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 
 @Entity
@@ -34,7 +35,11 @@ public class HerbModel {
     @Column(name = "HARVEST_TIME")
     private LocalDate harvestTime;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserModel user;
+    @ManyToMany
+    @JoinTable(
+            name = "user_herb",
+            joinColumns = @JoinColumn(name = "herb_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<UserModel> users;
 }

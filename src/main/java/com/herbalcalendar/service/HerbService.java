@@ -22,7 +22,7 @@ public class HerbService {
 
     public HerbModel createHerb(HerbModel herb) {
         HerbModel newHerb = new HerbModel();
-        newHerb = herbRepository.save(newHerb);
+        newHerb = herbRepository.save(herb);
         return newHerb;
     }
 

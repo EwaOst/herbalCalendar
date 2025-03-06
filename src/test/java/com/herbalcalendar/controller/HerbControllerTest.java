@@ -60,7 +60,9 @@ class HerbControllerTest {
     void createHerb_ShouldCreateHerbAndReturnCreatedStatus() throws Exception {
         HerbModel herb = new HerbModel();
         HerbModel savedHerb = new HerbModel();
+
         when(herbService.createHerb(any(HerbModel.class))).thenReturn(savedHerb);
+
         mockMvc.perform(post("/herbs")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(herb)))
@@ -73,7 +75,9 @@ class HerbControllerTest {
     void updateHerb_ShouldUpdateHerbAndReturnNewHerb() throws Exception {
         HerbModel herb = new HerbModel();
         HerbModel newHerb = new HerbModel();
+
         when(herbService.updateHerb(any(Long.class), any(HerbModel.class))).thenReturn(Optional.of(newHerb));
+
         mockMvc.perform(put("/herbs/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(herb)))
@@ -83,10 +87,12 @@ class HerbControllerTest {
     }
 
     @Test
-    void findHerbById_ShouldFindGoalWithProvidedId() throws Exception {
+    void findHerbById_ShouldFindHerbWithProvidedId() throws Exception {
         HerbModel foundHerb = new HerbModel();
         foundHerb.setId(1L);
+
         when(herbService.getHerbById(any(Long.class))).thenReturn(Optional.of(foundHerb));
+
         mockMvc.perform(get("/herbs/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -95,7 +101,9 @@ class HerbControllerTest {
 
     @Test
     void findHerbById_ShouldReturnNotFoundOrNonExistingHerb() throws Exception {
+
         when(herbService.getHerbById(any(Long.class))).thenReturn(Optional.empty());
+
         mockMvc.perform(get("/herbs/{id}", 2L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
@@ -105,7 +113,9 @@ class HerbControllerTest {
     @Test
     void deleteHerb_ShouldDeleteWithProvidedId() throws Exception {
         Long herbId = 1L;
+
         doNothing().when(herbService).deleteHerb(any(Long.class));
+
         mockMvc.perform(delete("/herbs/{id}", herbId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
