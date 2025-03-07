@@ -53,6 +53,12 @@ public class HerbController {
         herbService.deleteHerb(id);
         return ResponseEntity.noContent()
                 .build();
+
+    }
+    @GetMapping("/{userId}/herbs")
+    public ResponseEntity<List<HerbModel>> getHerbsByUserId(@PathVariable Long userId) {
+        List<HerbModel> herbs = herbService.getHerbsByUserId(userId);
+        return ResponseEntity.ok(herbs);
     }
 }
 

@@ -36,7 +36,7 @@ public class UserController {
         return userService.updateUser(id, user)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound()
-                .build());
+                        .build());
     }
 
     @GetMapping("/{id}")
@@ -54,8 +54,11 @@ public class UserController {
                 .build();
     }
 
-
-
+    @PostMapping("/{userId}/herbs/{herbId}")
+    public ResponseEntity<UserModel> addHerbToUser(@PathVariable Long userId, @PathVariable Long herbId) {
+        UserModel user = userService.addHerbToUser(userId, herbId);
+        return ResponseEntity.ok(user);
+    }
 
 
 }

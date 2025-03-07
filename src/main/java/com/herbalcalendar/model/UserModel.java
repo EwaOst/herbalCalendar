@@ -39,5 +39,5 @@ public class UserModel {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<UserHerb> userHerbs = new ArrayList<>();
+    private List<UserHerbModel> userHerbs = new ArrayList<>();
 }

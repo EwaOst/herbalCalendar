@@ -1,10 +1,9 @@
 package com.herbalcalendar.model;
 
-import jakarta.annotation.Nullable;
+import com.herbalcalendar.enums.ActiveCompoundEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
@@ -26,17 +25,18 @@ public class HerbModel {
     private String herb;
 
     @Column(name = "NAME", length = 128)
-    private String name;
+    private String latinName;
 
     @Column(name = "DESCRIPTION")
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "ACTIVE_COMPOUNDS")
-    private String activeCompounds;
+    private ActiveCompoundEnum activeCompoundEnum;
 
-    @Column(name = "HARVEST_TIME")
-    private LocalDate harvestTime;
+    @Embedded
+    private HarvestPeriod harvestPeriod;
 
     @OneToMany(mappedBy = "herb", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserHerb> userHerbs = new ArrayList<>();
+    private List<UserHerbModel> userHerbs = new ArrayList<>();
 }
