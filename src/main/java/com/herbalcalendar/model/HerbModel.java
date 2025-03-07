@@ -1,6 +1,5 @@
 package com.herbalcalendar.model;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,8 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 
 @Entity
@@ -37,6 +34,7 @@ public class HerbModel {
     @Column(name = "HARVEST_TIME")
     private LocalDate harvestTime;
 
-    @OneToMany(mappedBy = "herb", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserHerb> userHerbs = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserModel user;
 }
