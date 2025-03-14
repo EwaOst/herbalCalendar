@@ -1,6 +1,7 @@
 package com.herbalcalendar.service;
 
 import com.herbalcalendar.exception.ForbiddenException;
+import com.herbalcalendar.exception.HerbNotFoundException;
 import com.herbalcalendar.exception.UserAlreadyExistsException;
 import com.herbalcalendar.model.HerbModel;
 import com.herbalcalendar.model.UserHerbModel;
@@ -79,7 +80,7 @@ public class UserService {
         UserModel user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
         HerbModel herb = herbRepository.findById(herbId)
-                .orElseThrow(() -> new EntityNotFoundException("Herb not found"));
+                .orElseThrow(() -> new HerbNotFoundException("Herb not found with id: " + herbId));
 
         // Utwórz encję UserHerb
         UserHerbModel userHerb = new UserHerbModel();
@@ -100,9 +101,7 @@ public class UserService {
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new ForbiddenException("Invalid password");
         }
-
         return user;
     }
-
 }
 
