@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.herbalcalendar.SecurityConfig;
+import com.herbalcalendar.security.SecurityConfig;
 import com.herbalcalendar.model.UserModel;
 import com.herbalcalendar.service.UserService;
 import org.junit.jupiter.api.BeforeEach;

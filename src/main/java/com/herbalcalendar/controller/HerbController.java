@@ -36,12 +36,11 @@ public class HerbController {
 
     @PutMapping("/{id}")
     public ResponseEntity<HerbModel> updateHerb(@PathVariable Long id, @RequestBody HerbModel herb) {
-        try {
-            HerbModel updatedHerb = herbService.updateHerb(id, herb);
-            return ResponseEntity.ok(updatedHerb);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        // Wywołanie serwisu, który może rzucić wyjątek HerbNotFoundException
+        HerbModel updatedHerb = herbService.updateHerb(id, herb);
+
+        // Jeśli herb został zaktualizowany, zwracamy go w odpowiedzi
+        return ResponseEntity.ok(updatedHerb);
     }
 
     @GetMapping("/{id}")

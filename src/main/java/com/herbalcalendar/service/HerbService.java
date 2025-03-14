@@ -1,5 +1,6 @@
 package com.herbalcalendar.service;
 
+import com.herbalcalendar.exception.HerbNotFoundException;
 import com.herbalcalendar.model.HerbModel;
 import com.herbalcalendar.model.UserHerbModel;
 import com.herbalcalendar.repository.HerbRepository;
@@ -38,16 +39,19 @@ public class HerbService {
         }
     }
 
-    public HerbModel updateHerb(Long id, HerbModel updateHerb) {
+    public HerbModel updateHerb(Long id, HerbModel herb) {
+        // Szukamy zioła w bazie danych
         HerbModel existingHerb = herbRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Herb do not exist"));
+                .orElseThrow(() -> new HerbNotFoundException("Herb not found with id: " + id));
 
-        existingHerb.setHerb(updateHerb.getHerb());
-        existingHerb.setLatinName(updateHerb.getLatinName());
-        existingHerb.setDescription(updateHerb.getDescription());
-        existingHerb.setActiveCompoundEnum(updateHerb.getActiveCompoundEnum());
-        existingHerb.setHarvestPeriod(updateHerb.getHarvestPeriod());
+        // Zaktualizowanie danych
+        existingHerb.setHerb(herb.getHerb());
+        existingHerb.setLatinName(herb.getLatinName());
+        existingHerb.setDescription(herb.getDescription());
+        existingHerb.setActiveCompoundEnum(herb.getActiveCompoundEnum());
+        existingHerb.setHarvestPeriod(herb.getHarvestPeriod());
 
+        // Zapisanie zaktualizowanego zioła
         return herbRepository.save(existingHerb);
     }
 

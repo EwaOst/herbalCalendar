@@ -33,16 +33,22 @@ class HerbServiceTest {
     @InjectMocks
     private HerbService herbService;
 
+    // Metoda pomocnicza do tworzenia HerbModel
+    private HerbModel createHerbModel(Long id, String name, String latinName, String description,
+                                      ActiveCompoundEnum activeCompound, HarvestPeriod harvestPeriod) {
+        return new HerbModel(id, name, latinName, description, activeCompound, harvestPeriod, new ArrayList<>());
+    }
+
     @Test
     void getAllHerbs() {
         // Given
-        HerbModel herb1 = new HerbModel(
+        HerbModel herb1 = createHerbModel(
                 1L, "Mieta", "Mentha", "Opis miety", ActiveCompoundEnum.OLEJKI_ETERYCZNE,
-                new HarvestPeriod(HarvestTime.POCZATEK, Month.JUNE, "kwiaty"), new ArrayList<>());
+                new HarvestPeriod(HarvestTime.POCZATEK, Month.JUNE, "kwiaty"));
 
-        HerbModel herb2 = new HerbModel(
+        HerbModel herb2 = createHerbModel(
                 2L, "Nagietek", "Calendula officinalis", "Opis nagietka", ActiveCompoundEnum.FLAWONOIDY,
-                new HarvestPeriod(HarvestTime.KONIEC, Month.APRIL, "korzenie"), new ArrayList<>());
+                new HarvestPeriod(HarvestTime.KONIEC, Month.APRIL, "korzenie"));
 
         List<HerbModel> expectedHerbs = Arrays.asList(herb1, herb2);
 
@@ -61,15 +67,9 @@ class HerbServiceTest {
     @Test
     void createHerb() {
         // GIVEN
-        HerbModel herbModel = new HerbModel();
-        HarvestPeriod harvestPeriod = new HarvestPeriod(HarvestTime.POCZATEK, Month.JUNE, "liście");
-
-        herbModel.setHerb("Mięta");
-        herbModel.setLatinName("Mentha");
-        herbModel.setDescription("Leczy żołądek");
-        herbModel.setActiveCompoundEnum(ActiveCompoundEnum.OLEJKI_ETERYCZNE);
-        herbModel.setHarvestPeriod(harvestPeriod);
-        herbModel.setUserHerbs(new ArrayList<>());
+        HerbModel herbModel = createHerbModel(1L, "Mięta", "Mentha", "Leczy żołądek",
+                ActiveCompoundEnum.OLEJKI_ETERYCZNE,
+                new HarvestPeriod(HarvestTime.POCZATEK, Month.JUNE, "liście"));
 
         // WHEN
         when(herbRepository.save(any(HerbModel.class))).thenReturn(herbModel);
@@ -84,20 +84,20 @@ class HerbServiceTest {
         assertEquals(HarvestTime.POCZATEK, result.getHarvestPeriod().getHarvestTime());
         assertEquals(Month.JUNE, result.getHarvestPeriod().getHarvestMonth());
         assertEquals("liście", result.getHarvestPeriod().getPart()); // Porównanie z "liście"
-
         assertTrue(result.getUserHerbs().isEmpty());
     }
 
     @Test
     void getHerbById() {
-
-        HerbModel herbModel = new HerbModel();
-        herbModel.setId(1L);
-        herbModel.setHerb("Mieta");
+        // GIVEN
+        HerbModel herbModel = createHerbModel(1L, "Mieta", "Mentha", "Opis miety",
+                ActiveCompoundEnum.OLEJKI_ETERYCZNE,
+                new HarvestPeriod(HarvestTime.POCZATEK, Month.JUNE, "liście"));
 
         when(herbRepository.findById(1L)).thenReturn(Optional.of(herbModel));
         Optional<HerbModel> result = herbService.getHerbById(1L);
 
+        // THEN
         assertTrue(result.isPresent());
         assertEquals("Mieta", result.get().getHerb());
     }
@@ -105,30 +105,22 @@ class HerbServiceTest {
     @Test
     void updateHerb() {
         Long herbId = 1L;
-        HerbModel existingHerb = new HerbModel();
-        // Given
-        existingHerb.setId(herbId);
-        existingHerb.setHerb("Mieta");
-        existingHerb.setLatinName("Mentha");
-        existingHerb.setDescription("Mieta (z łac. Mentha L.) jest krzewinką szeroko rozpowszechnioną w uprawach, występującą również w stanie dzikim.");
-        existingHerb.setActiveCompoundEnum(ActiveCompoundEnum.OLEJKI_ETERYCZNE);
-        existingHerb.setHarvestPeriod(new HarvestPeriod(HarvestTime.POCZATEK, Month.JULY, "kwiaty"));
 
-        HerbModel updateHerb = new HerbModel();
-        updateHerb.setHerb("Nagietek lekarski");
-        updateHerb.setLatinName("Calendula officinalis");
-        updateHerb.setDescription("Nagietek lekarski jako surowiec leczniczy wykorzystywany jest w postaci kwiatów (łac. calendulae flos), z których przyrządza się herbatę, maści, olejek eteryczny, wyciągi wodne i alkoholowe.");
-        updateHerb.setActiveCompoundEnum(ActiveCompoundEnum.FLAWONOIDY);
-        updateHerb.setHarvestPeriod(new HarvestPeriod(HarvestTime.KONIEC, Month.APRIL, "korzenie"));
+        // GIVEN
+        HerbModel existingHerb = createHerbModel(herbId, "Mieta", "Mentha", "Mieta (z łac. Mentha L.) jest krzewinką szeroko rozpowszechnioną w uprawach, występującą również w stanie dzikim.",
+                ActiveCompoundEnum.OLEJKI_ETERYCZNE, new HarvestPeriod(HarvestTime.POCZATEK, Month.JULY, "kwiaty"));
 
-        // When
+        HerbModel updateHerb = createHerbModel(herbId, "Nagietek lekarski", "Calendula officinalis", "Nagietek lekarski jako surowiec leczniczy wykorzystywany jest w postaci kwiatów...",
+                ActiveCompoundEnum.FLAWONOIDY, new HarvestPeriod(HarvestTime.KONIEC, Month.APRIL, "korzenie"));
+
+        // WHEN
         when(herbRepository.findById(herbId)).thenReturn(Optional.of(existingHerb));
         when(herbRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        HerbModel result = herbService.updateHerb(herbId, updateHerb); // Bez Optional
+        HerbModel result = herbService.updateHerb(herbId, updateHerb);
 
-        // Then
-        assertEquals(updateHerb.getHerb(), result.getHerb()); // Sprawdź, czy nazwa zioła została zaktualizowana
+        // THEN
+        assertEquals(updateHerb.getHerb(), result.getHerb());
         assertEquals(updateHerb.getLatinName(), result.getLatinName());
         assertEquals(updateHerb.getDescription(), result.getDescription());
         assertEquals(updateHerb.getActiveCompoundEnum(), result.getActiveCompoundEnum());
@@ -150,12 +142,12 @@ class HerbServiceTest {
 
     @Test
     void getHerbsByUserId() {
-        // Given
+        // GIVEN
         Long userId = 1L;
 
         // Przygotowanie danych testowych
-        HerbModel herb1 = new HerbModel(1L, "Mięta", "Mentha", "Opis miety", ActiveCompoundEnum.OLEJKI_ETERYCZNE, new HarvestPeriod(HarvestTime.POCZATEK, Month.JUNE, "kwiaty"), new ArrayList<>());
-        HerbModel herb2 = new HerbModel(2L, "Rumianek", "Calendula officinalis", "Opis rumianku", ActiveCompoundEnum.FLAWONOIDY, new HarvestPeriod(HarvestTime.KONIEC, Month.APRIL, "korzenie"), new ArrayList<>());
+        HerbModel herb1 = createHerbModel(1L, "Mięta", "Mentha", "Opis miety", ActiveCompoundEnum.OLEJKI_ETERYCZNE, new HarvestPeriod(HarvestTime.POCZATEK, Month.JUNE, "kwiaty"));
+        HerbModel herb2 = createHerbModel(2L, "Rumianek", "Calendula officinalis", "Opis rumianku", ActiveCompoundEnum.FLAWONOIDY, new HarvestPeriod(HarvestTime.KONIEC, Month.APRIL, "korzenie"));
 
         UserHerbModel userHerb1 = new UserHerbModel();
         userHerb1.setHerb(herb1);
@@ -168,10 +160,10 @@ class HerbServiceTest {
         // Mockowanie zachowania repozytorium
         when(userHerbRepository.findByUser_Id(userId)).thenReturn(userHerbs);
 
-        // When
+        // WHEN
         List<HerbModel> result = herbService.getHerbsByUserId(userId);
 
-        // Then
+        // THEN
         assertNotNull(result);
         assertEquals(2, result.size());
         assertEquals(herb1, result.get(0));

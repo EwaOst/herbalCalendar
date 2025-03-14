@@ -2,6 +2,7 @@ package com.herbalcalendar.service;
 
 import static org.mockito.ArgumentMatchers.any;
 
+import com.herbalcalendar.exception.UserAlreadyExistsException;
 import com.herbalcalendar.model.HerbModel;
 import com.herbalcalendar.model.UserHerbModel;
 import com.herbalcalendar.model.UserModel;
@@ -28,10 +29,6 @@ class UserServiceTest {
     private UserRepository userRepository;
     @Mock
     private HerbRepository herbRepository;
-    @Mock
-    private UserHerbModel userHerbModel;
-    @Mock
-    private HerbModel herbModel;
     @Mock
     private PasswordEncoder passwordEncoder;
     @InjectMocks
@@ -74,10 +71,29 @@ class UserServiceTest {
         assertEquals("John", result.getUsername());
         assertEquals("john@o2.pl", result.getEmail());
         assertEquals("dfsdf", result.getPassword());
-        assertEquals(true, result.isActive());
+        assertTrue(result.isActive());
         assertEquals(userModel.getCreatedAt().getTime(), result.getCreatedAt().getTime());
 
         assertTrue(result.getUserHerbs().isEmpty());
+    }
+
+    @Test
+    void createUser_ShouldThrowUserAlreadyExistsException_WhenEmailAlreadyExists() {
+        // Given
+        String existingEmail = "test@example.com";
+        UserModel existingUser = new UserModel();
+        existingUser.setEmail(existingEmail);
+
+        // Mockowanie repozytorium, żeby zwróciło true przy sprawdzaniu istnienia użytkownika
+        when(userRepository.existsByEmail(existingEmail)).thenReturn(true);
+
+        // When & Then
+        UserModel newUser = new UserModel();
+        newUser.setEmail(existingEmail);
+
+        // Testujemy, czy metoda rzuci wyjątek
+        assertThrows(UserAlreadyExistsException.class,
+                () -> userService.createUser(newUser));
     }
 
     @Test
@@ -120,6 +136,7 @@ class UserServiceTest {
 
         Optional<UserModel> result = userService.updateUser(userId, updateUser);
 
+        assertTrue(result.isPresent());
         assertEquals(updateUser.getUsername(), result.get().getUsername());
         assertEquals(updateUser.getEmail(), result.get().getEmail());
         assertEquals(updateUser.getPassword(), result.get().getPassword());
@@ -173,7 +190,7 @@ class UserServiceTest {
         assertEquals(userId, result.getId());
         assertEquals(1, result.getUserHerbs().size()); // Sprawdzenie, czy zioło zostało dodane
 
-        UserHerbModel userHerb = result.getUserHerbs().get(0);
+        UserHerbModel userHerb = result.getUserHerbs().getFirst();
         assertNotNull(userHerb);
         assertEquals(user, userHerb.getUser());
         assertEquals(herb, userHerb.getHerb());

@@ -1,7 +1,7 @@
 package com.herbalcalendar.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.herbalcalendar.SecurityConfig;
+import com.herbalcalendar.security.SecurityConfig;
 import com.herbalcalendar.model.HerbModel;
 import com.herbalcalendar.service.HerbService;
 import org.junit.jupiter.api.Test;
