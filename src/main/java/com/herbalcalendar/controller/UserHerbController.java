@@ -17,7 +17,6 @@ import java.util.List;
 @RequestMapping("/user-herbs")
 public class UserHerbController {
 
-
     private final HerbService herbService;
 
     @Autowired

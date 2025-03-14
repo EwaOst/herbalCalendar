@@ -5,29 +5,28 @@ import com.herbalcalendar.model.UserHerbModel;
 import com.herbalcalendar.repository.HerbRepository;
 import com.herbalcalendar.repository.UserHerbRepository;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class HerbService {
-    @Autowired
-    private HerbRepository herbRepository;
+
+    private final HerbRepository herbRepository;
     private final UserHerbRepository userHerbRepository;
+
+    public HerbService(HerbRepository herbRepository, UserHerbRepository userHerbRepository){
+        this.herbRepository = herbRepository;
+        this.userHerbRepository = userHerbRepository;
+    }
 
     public List<HerbModel> getAllHerbs() {
         return herbRepository.findAll();
     }
 
     public HerbModel createHerb(HerbModel herb) {
-        HerbModel newHerb = new HerbModel();
-        newHerb = herbRepository.save(herb);
-        return newHerb;
+        return herbRepository.save(herb);
     }
 
     public Optional<HerbModel> getHerbById(Long id) {
@@ -39,18 +38,18 @@ public class HerbService {
         }
     }
 
-    public Optional<HerbModel> updateHerb(Long id, HerbModel updateHerb) {
-        return Optional.ofNullable(herbRepository.findById(id)
-                .map(herb -> {
-                    herb.setLatinName(updateHerb.getLatinName());
-                    herb.setDescription(updateHerb.getDescription());
-                    herb.setActiveCompoundEnum(updateHerb.getActiveCompoundEnum());
-                    herb.setHarvestPeriod(updateHerb.getHarvestPeriod());
-                    return herbRepository.save(herb);
-                })
-                .orElseThrow(() -> new RuntimeException("Herb do not exists")));
-    }
+    public HerbModel updateHerb(Long id, HerbModel updateHerb) {
+        HerbModel existingHerb = herbRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Herb do not exist"));
 
+        existingHerb.setHerb(updateHerb.getHerb());
+        existingHerb.setLatinName(updateHerb.getLatinName());
+        existingHerb.setDescription(updateHerb.getDescription());
+        existingHerb.setActiveCompoundEnum(updateHerb.getActiveCompoundEnum());
+        existingHerb.setHarvestPeriod(updateHerb.getHarvestPeriod());
+
+        return herbRepository.save(existingHerb);
+    }
 
     public void deleteHerb(Long id) {
         if (!herbRepository.existsById(id)) {
@@ -70,8 +69,7 @@ public class HerbService {
         // Mapujemy UserHerbModel na HerbModel
         return userHerbs.stream()
                 .map(UserHerbModel::getHerb) // Pobieramy HerbModel z UserHerbModel
-                .collect(Collectors.toList());
+                .toList();
     }
-
 }
 

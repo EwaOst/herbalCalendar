@@ -4,7 +4,6 @@ import com.herbalcalendar.model.HerbModel;
 import com.herbalcalendar.service.HerbService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,8 +15,12 @@ import java.util.List;
 @RequestMapping("/herbs")
 public class HerbController {
 
-    @Autowired
+
     private HerbService herbService;
+
+    public  HerbController(HerbService herbService){
+        this.herbService = herbService;
+    }
 
     @GetMapping
     public ResponseEntity<List<HerbModel>> getAllHerbs() {
@@ -33,10 +36,12 @@ public class HerbController {
 
     @PutMapping("/{id}")
     public ResponseEntity<HerbModel> updateHerb(@PathVariable Long id, @RequestBody HerbModel herb) {
-        return herbService.updateHerb(id, herb)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound()
-                        .build());
+        try {
+            HerbModel updatedHerb = herbService.updateHerb(id, herb);
+            return ResponseEntity.ok(updatedHerb);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/{id}")
@@ -45,7 +50,6 @@ public class HerbController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound()
                         .build());
-
     }
 
     @DeleteMapping("/{id}")
@@ -53,8 +57,8 @@ public class HerbController {
         herbService.deleteHerb(id);
         return ResponseEntity.noContent()
                 .build();
-
     }
+
     @GetMapping("/{userId}/herbs")
     public ResponseEntity<List<HerbModel>> getHerbsByUserId(@PathVariable Long userId) {
         List<HerbModel> herbs = herbService.getHerbsByUserId(userId);
