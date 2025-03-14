@@ -6,7 +6,6 @@ import com.herbalcalendar.repository.UserHerbRepository;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class UserHerbService {
@@ -17,8 +16,6 @@ public class UserHerbService {
         List<UserHerbModel> userHerbs = userHerbRepository.findByUser_Id(userId);
         return userHerbs.stream()
                 .map(UserHerbModel::getHerb)
-                .collect(Collectors.toList());
-
+                .toList();
     }
-
 }

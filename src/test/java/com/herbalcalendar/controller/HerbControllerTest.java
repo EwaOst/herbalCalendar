@@ -1,6 +1,7 @@
 package com.herbalcalendar.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.herbalcalendar.security.SecurityConfig;
 import com.herbalcalendar.model.HerbModel;
 import com.herbalcalendar.service.HerbService;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -24,14 +26,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import static org.mockito.Mockito.when;
 
-
+@Import(SecurityConfig.class)
 @AutoConfigureMockMvc
 @WebMvcTest(HerbController.class)
 class HerbControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
 
     @MockBean
     private HerbService herbService;
@@ -68,22 +69,24 @@ class HerbControllerTest {
                         .content(objectMapper.writeValueAsString(herb)))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(objectMapper.writeValueAsString(savedHerb)));
-
     }
+
 
     @Test
     void updateHerb_ShouldUpdateHerbAndReturnNewHerb() throws Exception {
-        HerbModel herb = new HerbModel();
-        HerbModel newHerb = new HerbModel();
+        // Given
+        HerbModel herb = new HerbModel(); // Pusty obiekt
+        HerbModel newHerb = new HerbModel(); // Pusty obiekt
 
-        when(herbService.updateHerb(any(Long.class), any(HerbModel.class))).thenReturn(Optional.of(newHerb));
+        // Mockowanie serwisu
+        when(herbService.updateHerb(any(Long.class), any(HerbModel.class))).thenReturn(newHerb);
 
+        // When & Then
         mockMvc.perform(put("/herbs/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(herb)))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(newHerb)));
-
     }
 
     @Test

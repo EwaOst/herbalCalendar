@@ -7,7 +7,7 @@ public enum ActiveCompoundEnum {
     GARBINIKI,
     KUMARYNY,
     OLEJKI_ETERYCZNE,
-    ŚLUZY,
+    SLUZY,
     GLIKOZYDY,
     FITOSTEROLE,
     TERPENOIDY,
@@ -17,7 +17,7 @@ public enum ActiveCompoundEnum {
     KAROTENOIDY,
     PEKTYNY,
     KWASY_ORGANICZNE,
-    ENZYMY_ROŚLINNE,
+    ENZYMY_ROSLINNE,
     LAKTONY,
     LIGNANY,
     TANNINY;

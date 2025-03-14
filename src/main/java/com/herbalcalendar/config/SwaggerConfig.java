@@ -1,13 +1,10 @@
-package com.herbalcalendar;
+package com.herbalcalendar.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 public class SwaggerConfig {
-    @Configuration
-    public static class swaggerConfig {
 
         @Bean
         public OpenAPI customOpenAPI() {
@@ -18,4 +15,4 @@ public class SwaggerConfig {
                             .description("API for managing herbs in the Herbal Calendar application"));
         }
     }
-}
+
