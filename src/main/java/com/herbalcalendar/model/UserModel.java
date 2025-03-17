@@ -1,6 +1,7 @@
 package com.herbalcalendar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.herbalcalendar.enums.NotificationPreference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -40,4 +41,8 @@ public class UserModel {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<UserHerbModel> userHerbs = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "NOTIFICATION_PREFERENCE") // Opcjonalna adnotacja, jeśli chcesz dostosować nazwę kolumny
+    private NotificationPreference notificationPreference;
 }

@@ -1,7 +1,10 @@
 package com.herbalcalendar.controller;
 
+import com.herbalcalendar.enums.NotificationPreference;
 import com.herbalcalendar.model.UserModel;
+import com.herbalcalendar.repository.UserRepository;
 import com.herbalcalendar.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,6 +20,7 @@ public class UserController {
 
 
     private UserService userService;
+    private UserRepository userRepository;
 
     public UserController(UserService userService){
         this.userService = userService;
@@ -62,6 +66,15 @@ public class UserController {
         UserModel user = userService.addHerbToUser(userId, herbId);
         return ResponseEntity.ok(user);
     }
+    @PutMapping("/{userId}/notification-preference")
+    public ResponseEntity<String> updateNotificationPreference(@PathVariable Long userId,
+                                                               @RequestParam NotificationPreference preference) {
+        UserModel user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
+        user.setNotificationPreference(preference);
+        userRepository.save(user);
 
+        return ResponseEntity.ok("Notification preference updated to " + preference);
+    }
 }

@@ -24,5 +24,7 @@ public class HarvestPeriod {
 
     private String part;
 
-    private LocalDate harvestStartDate;
+    public LocalDate getHarvestStartDate() {
+        return LocalDate.of(LocalDate.now().getYear(), harvestMonth, 1);
+    }
 }
