@@ -5,19 +5,24 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDate;
 import java.time.Month;
 
 @Getter
 @Embeddable
+@NoArgsConstructor
 @RequiredArgsConstructor
 public class HarvestPeriod {
     @Enumerated(EnumType.STRING)
-    private final HarvestTime harvestTime; // Pole finalne, wymaga wartości w konstruktorze
+    private HarvestTime harvestTime;
 
     @Enumerated(EnumType.STRING)
-    private final Month harvestMonth; // Pole finalne, wymaga wartości w konstruktorze
+    private Month harvestMonth;
 
-    private final String part; // Można pozostać bez final (wtedy można ustawić setterem)
+    private String part;
 
+    private LocalDate harvestStartDate;
 }
