@@ -1,6 +1,5 @@
 package com.herbalcalendar.exception;
 
-import io.jsonwebtoken.io.IOException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -26,6 +25,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleNotificationException(NotificationException ex) {
         return new ResponseEntity<>("Błąd powiadomienia: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(JwtAuthenticationException.class)
+    public ResponseEntity<String> handleJwtException(JwtAuthenticationException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized: " + ex.getMessage());
+    }
+
 
     // Obsługuje inne ogólne wyjątki
     @ExceptionHandler(Exception.class)

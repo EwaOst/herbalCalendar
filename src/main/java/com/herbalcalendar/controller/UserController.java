@@ -3,6 +3,7 @@ package com.herbalcalendar.controller;
 import com.herbalcalendar.enums.NotificationPreference;
 import com.herbalcalendar.model.UserModel;
 import com.herbalcalendar.repository.UserRepository;
+import com.herbalcalendar.security.JwtTokenProvider;
 import com.herbalcalendar.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -21,8 +22,9 @@ public class UserController {
 
     private UserService userService;
     private UserRepository userRepository;
+    private JwtTokenProvider jwtTokenProvider;
 
-    public UserController(UserService userService){
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
@@ -66,10 +68,15 @@ public class UserController {
         UserModel user = userService.addHerbToUser(userId, herbId);
         return ResponseEntity.ok(user);
     }
-    @PutMapping("/{userId}/notification-preference")
-    public ResponseEntity<String> updateNotificationPreference(@PathVariable Long userId,
-                                                               @RequestParam NotificationPreference preference) {
-        UserModel user = userRepository.findById(userId)
+
+    @PutMapping("/notification-preference")
+    public ResponseEntity<String> updateNotificationPreference(
+            @RequestParam NotificationPreference preference,
+            @RequestHeader("Authorization") String token) {
+
+        Long userIdFromToken = jwtTokenProvider.getUserIdFromToken(token.substring(7));
+
+        UserModel user = userRepository.findById(userIdFromToken)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         user.setNotificationPreference(preference);

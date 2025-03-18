@@ -4,9 +4,9 @@ import com.herbalcalendar.enums.HarvestTime;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -14,8 +14,9 @@ import java.time.Month;
 @Getter
 @Embeddable
 @NoArgsConstructor
-@RequiredArgsConstructor
-public class HarvestPeriod {
+@AllArgsConstructor
+public class HarvestPeriodModel {
+
     @Enumerated(EnumType.STRING)
     private HarvestTime harvestTime;
 
@@ -25,6 +26,6 @@ public class HarvestPeriod {
     private String part;
 
     public LocalDate getHarvestStartDate() {
-        return LocalDate.of(LocalDate.now().getYear(), harvestMonth, 1);
+        return (harvestMonth != null) ? LocalDate.of(LocalDate.now().getYear(), harvestMonth, 1) : null;
     }
 }

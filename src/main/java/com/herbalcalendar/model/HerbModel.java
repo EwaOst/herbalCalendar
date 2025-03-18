@@ -34,7 +34,7 @@ public class HerbModel {
     private ActiveCompoundEnum activeCompoundEnum;
 
     @Embedded
-    private HarvestPeriod harvestPeriod;
+    private HarvestPeriodModel harvestPeriod;
 
     @OneToMany(mappedBy = "herb", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserHerbModel> userHerbs = new ArrayList<>();

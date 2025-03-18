@@ -2,7 +2,7 @@ package com.herbalcalendar.service;
 
 import com.herbalcalendar.NotificationHandler;
 import com.herbalcalendar.exception.NotificationException;
-import com.herbalcalendar.model.HarvestPeriod;
+import com.herbalcalendar.model.HarvestPeriodModel;
 import com.herbalcalendar.model.HerbModel;
 import com.herbalcalendar.model.UserModel;
 import com.herbalcalendar.repository.HerbRepository;
@@ -30,7 +30,7 @@ public class NotificationService {
     }
 
     @Scheduled(cron = "0 0 8 * * *") // Codziennie o 8 rano
-    public void sendHarvestNotifications() throws IOException {
+    public void sendHarvestNotifications() {
         List<HerbModel> herbs = herbRepository.findAll();
         LocalDate today = LocalDate.now();
 
@@ -65,7 +65,7 @@ public class NotificationService {
         }
     }
 
-    private boolean isHarvestTimeApproaching(HarvestPeriod harvestPeriod, LocalDate today) {
+    private boolean isHarvestTimeApproaching(HarvestPeriodModel harvestPeriod, LocalDate today) {
         return harvestPeriod.getHarvestStartDate().minusDays(3).isEqual(today);
     }
 }

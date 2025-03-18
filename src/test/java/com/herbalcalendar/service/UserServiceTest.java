@@ -2,6 +2,7 @@ package com.herbalcalendar.service;
 
 import static org.mockito.ArgumentMatchers.any;
 
+import com.herbalcalendar.enums.NotificationPreference;
 import com.herbalcalendar.exception.UserAlreadyExistsException;
 import com.herbalcalendar.model.HerbModel;
 import com.herbalcalendar.model.UserHerbModel;
@@ -37,10 +38,10 @@ class UserServiceTest {
     @Test
     void getAllUsers() {
         UserModel user1 = new UserModel(
-                1L, "Ewa", "ewaoster@muster.pl", "12552", true, new Date(), new ArrayList<>()
+                1L, "Ewa", "ewaoster@muster.pl", "12552", true, new Date(), new ArrayList<>(), NotificationPreference.EMAIL
         );
         UserModel user2 = new UserModel(
-                2L, "alanb", "awe@o2.pl", "dffd", false, new Date(), new ArrayList<>()
+                2L, "alanb", "awe@o2.pl", "dffd", false, new Date(), new ArrayList<>(), NotificationPreference.EMAIL
         );
         List<UserModel> expectedUsers = Arrays.asList(user1, user2);
 

@@ -5,6 +5,7 @@ import com.herbalcalendar.dto.LoginRequest;
 import com.herbalcalendar.model.UserModel;
 import com.herbalcalendar.security.JwtTokenProvider;
 import com.herbalcalendar.service.UserService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +19,7 @@ public class AuthController {
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public AuthController(UserService userService, JwtTokenProvider jwtTokenProvider) {
+    public AuthController(UserService userService, @Lazy JwtTokenProvider jwtTokenProvider) {
         this.userService = userService;
         this.jwtTokenProvider = jwtTokenProvider;
     }
@@ -29,7 +30,7 @@ public class AuthController {
         UserModel user = userService.authenticate(loginRequest.getUsername(), loginRequest.getPassword());
 
         // 2. Wygeneruj token JWT
-        String token = jwtTokenProvider.generateToken(user.getUsername());
+        String token = jwtTokenProvider.generateToken(user.getId(), user.getUsername());
 
         // 3. Zwróć token w odpowiedzi
         return ResponseEntity.ok(new JwtAuthenticationResponse(token));
