@@ -1,17 +1,20 @@
 package com.herbalcalendar.service;
 
 import com.herbalcalendar.NotificationHandler;
+import com.herbalcalendar.enums.NotificationPreference;
 import com.herbalcalendar.exception.NotificationException;
-import com.herbalcalendar.model.HarvestPeriodModel;
 import com.herbalcalendar.model.HerbModel;
 import com.herbalcalendar.model.UserModel;
 import com.herbalcalendar.repository.HerbRepository;
 import com.herbalcalendar.repository.UserRepository;
-import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 
 @Service
@@ -20,6 +23,7 @@ public class NotificationService {
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final NotificationHandler notificationHandler;
+    private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
 
     public NotificationService(HerbRepository herbRepository, UserRepository userRepository,
                                EmailService emailService, NotificationHandler notificationHandler) {
@@ -31,42 +35,49 @@ public class NotificationService {
 
     @Scheduled(cron = "0 0 8 * * *") // Codziennie o 8 rano
     public void sendHarvestNotifications() {
-        List<HerbModel> herbs = herbRepository.findAll();
         LocalDate today = LocalDate.now();
 
+        // Pobierz tylko te zioła, których czas zbioru zbliża się
+        List<HerbModel> herbs = herbRepository.findByHarvestPeriod_HarvestMonth(Month.JUNE);
+
         for (HerbModel herb : herbs) {
-            if (isHarvestTimeApproaching(herb.getHarvestPeriod(), today)) {
-                List<UserModel> users = userRepository.findAll();
-                for (UserModel user : users) {
+            // Pobierz tylko tych użytkowników, którzy mają aktywne powiadomienia
+            List<UserModel> users = userRepository.findByNotificationPreferenceIsNotNull();
+            for (UserModel user : users) {
+                try {
                     sendNotificationToUser(user, herb);
+                } catch (NotificationException e) {
+                    // Logowanie błędu bez przerywania pętli
+                    logger.error("Błąd podczas wysyłania powiadomienia do użytkownika: {} - {}", user.getId(), e.getMessage(), e);
                 }
             }
         }
     }
 
-    private void sendNotificationToUser(UserModel user, HerbModel herb) throws NotificationException {
+    public void sendNotificationToUser(UserModel user, HerbModel herb) throws NotificationException {
+        if (user.getNotificationPreference() == null) {
+            throw new NotificationException("Nieznany typ powiadomienia: null");
+        }
+
+        if (user.getEmail() == null && (user.getNotificationPreference() == NotificationPreference.EMAIL || user.getNotificationPreference() == NotificationPreference.BOTH)) {
+            throw new NotificationException("Użytkownik nie ma ustawionego adresu e-mail");
+        }
+
         String message = "Zbiór " + herb.getHerb() + " za 3 dni!";
 
-        try {
-            switch (user.getNotificationPreference()) {
-                case EMAIL:
-                    emailService.sendEmail(user.getEmail(), "Powiadomienie o zbiorach", message);
-                    break;
-                case APP:
-                    notificationHandler.sendNotification(message);
-                    break;
-                case BOTH:
-                    emailService.sendEmail(user.getEmail(), "Powiadomienie o zbiorach", message);
-                    notificationHandler.sendNotification(message);
-                    break;
-            }
-        } catch (IOException e) {
-            throw new NotificationException("Błąd podczas wysyłania powiadomienia", e);
+        switch (user.getNotificationPreference()) {
+            case EMAIL:
+                emailService.sendEmail(user.getEmail(), "Powiadomienie o zbiorach", message);
+                break;
+            case APP:
+                notificationHandler.sendNotification(message);
+                break;
+            case BOTH:
+                emailService.sendEmail(user.getEmail(), "Powiadomienie o zbiorach", message);
+                notificationHandler.sendNotification(message);
+                break;
+            default:
+                throw new NotificationException("Nieznany typ powiadomienia: " + user.getNotificationPreference());
         }
     }
-
-    private boolean isHarvestTimeApproaching(HarvestPeriodModel harvestPeriod, LocalDate today) {
-        return harvestPeriod.getHarvestStartDate().minusDays(3).isEqual(today);
-    }
 }
-

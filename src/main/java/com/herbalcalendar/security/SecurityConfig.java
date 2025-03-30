@@ -30,7 +30,9 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable) // Wyłączamy CSRF dla API
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll() // Publiczne endpointy np. logowanie/rejestracja
+                        .requestMatchers("/auth/**").permitAll() // publiczne endpointy jak logowanie
+                        .requestMatchers("/herbs/**").permitAll()  // publiczne endpointy jak zioła
+                        .requestMatchers("/users/**").authenticated()  // Endpointy wymagające autoryzacji
                         .anyRequest().authenticated() // Reszta wymaga autoryzacji
                 )
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class); // Dodanie JWT filtra

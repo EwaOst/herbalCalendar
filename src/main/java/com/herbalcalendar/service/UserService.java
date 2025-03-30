@@ -1,5 +1,6 @@
 package com.herbalcalendar.service;
 
+import com.herbalcalendar.enums.NotificationPreference;
 import com.herbalcalendar.exception.ForbiddenException;
 import com.herbalcalendar.exception.HerbNotFoundException;
 import com.herbalcalendar.exception.UserAlreadyExistsException;
@@ -8,6 +9,7 @@ import com.herbalcalendar.model.UserHerbModel;
 import com.herbalcalendar.model.UserModel;
 import com.herbalcalendar.repository.HerbRepository;
 import com.herbalcalendar.repository.UserRepository;
+import com.herbalcalendar.security.JwtTokenProvider;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,12 +23,14 @@ public class UserService {
     private final UserRepository userRepository;
     private final HerbRepository herbRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     // Konstruktor wstrzykujący zależności
-    public UserService(UserRepository userRepository, HerbRepository herbRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, HerbRepository herbRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider1) {
         this.userRepository = userRepository;
         this.herbRepository = herbRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider1;
     }
 
     private static final String USER_NOT_FOUND = "User not found";
@@ -76,22 +80,22 @@ public class UserService {
 
 
     public UserModel addHerbToUser(Long userId, Long herbId) {
-        // Pobierz użytkownika i zioło z bazy danych
         UserModel user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
-        HerbModel herb = herbRepository.findById(herbId)
-                .orElseThrow(() -> new HerbNotFoundException("Herb not found with id: " + herbId));
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        // Utwórz encję UserHerb
+        HerbModel herb = herbRepository.findById(herbId)
+                .orElseThrow(() -> new HerbNotFoundException("Herb not found"));
+
+        // Dodajemy zioło do użytkownika
         UserHerbModel userHerb = new UserHerbModel();
         userHerb.setUser(user);
         userHerb.setHerb(herb);
 
-        // Dodaj UserHerb do listy użytkownika
+        // Zapiszemy nową relację w bazie
         user.getUserHerbs().add(userHerb);
+        userRepository.save(user);
 
-        // Zapisz zmiany w bazie danych
-        return userRepository.save(user);
+        return user;  // Zwracamy zaktualizowanego użytkownika
     }
 
     public UserModel authenticate(String username, String password) {
@@ -102,6 +106,18 @@ public class UserService {
             throw new ForbiddenException("Invalid password");
         }
         return user;
+    }
+
+    public void updateNotificationPreference(Long userId, NotificationPreference preference) {
+        UserModel user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+
+        user.setNotificationPreference(preference);
+        userRepository.save(user);
+    }
+
+    public Long getUserIdFromToken(String token) {
+        return jwtTokenProvider.getUserIdFromToken(token.substring(7));
     }
 }
 

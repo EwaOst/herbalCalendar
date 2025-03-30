@@ -1,5 +1,6 @@
 package com.herbalcalendar;
 
+import com.herbalcalendar.exception.NotificationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -25,10 +26,13 @@ public class NotificationHandler extends TextWebSocketHandler {
         sessions.remove(session);
     }
 
-    public void sendNotification(String message) throws IOException {
+    public void sendNotification(String message) {
         for (WebSocketSession session : sessions) {
-            session.sendMessage(new TextMessage(message));
+            try {
+                session.sendMessage(new TextMessage(message));
+            } catch (IOException e) {
+                throw new NotificationException("Błąd podczas wysyłania powiadomienia", e);
+            }
         }
     }
-
 }

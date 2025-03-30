@@ -3,6 +3,7 @@ package com.herbalcalendar.service;
 import static org.mockito.ArgumentMatchers.any;
 
 import com.herbalcalendar.enums.NotificationPreference;
+import com.herbalcalendar.exception.InvalidTokenException;
 import com.herbalcalendar.exception.UserAlreadyExistsException;
 import com.herbalcalendar.model.HerbModel;
 import com.herbalcalendar.model.UserHerbModel;
@@ -11,6 +12,8 @@ import com.herbalcalendar.repository.HerbRepository;
 
 import com.herbalcalendar.repository.UserRepository;
 
+import com.herbalcalendar.security.JwtTokenProvider;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,6 +35,8 @@ class UserServiceTest {
     private HerbRepository herbRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private JwtTokenProvider jwtTokenProvider;
     @InjectMocks
     private UserService userService;
 
@@ -262,6 +267,62 @@ class UserServiceTest {
 
         verify(userRepository).findByUsername(username);
         verify(passwordEncoder).matches(password, encodedPassword);
+    }
+
+    @Test
+    void updateNotificationPreference_ShouldUpdatePreferenceUsingUserIdFromToken() {
+        // GIVEN
+        Long userIdFromToken = 1L;
+        NotificationPreference preference = NotificationPreference.EMAIL;
+
+        // Przygotowanie użytkownika
+        UserModel user = new UserModel();
+        user.setId(userIdFromToken);
+        user.setNotificationPreference(NotificationPreference.APP); // Początkowa preferencja
+
+        // Mockowanie repozytorium, żeby zwróciło użytkownika o tym ID
+        when(userRepository.findById(userIdFromToken)).thenReturn(Optional.of(user));
+
+        // WHEN
+        userService.updateNotificationPreference(userIdFromToken, preference);
+
+        // THEN
+        assertEquals(preference, user.getNotificationPreference());
+        verify(userRepository).save(user); // Sprawdzamy, czy użytkownik został zapisany
+    }
+
+    @Test
+    void updateNotificationPreference_ShouldThrowException_WhenUserNotFound() {
+        // GIVEN
+        Long userIdFromToken = 1L;
+        NotificationPreference preference = NotificationPreference.EMAIL;
+
+        // Mockowanie repozytorium, żeby zwróciło pusty Optional (użytkownik nie istnieje)
+        when(userRepository.findById(userIdFromToken)).thenReturn(Optional.empty());
+
+        // WHEN + THEN
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, ()
+                -> userService.updateNotificationPreference(userIdFromToken, preference));
+
+        assertEquals("User not found", exception.getMessage());
+        verify(userRepository, never()).save(any()); // Sprawdzamy, że metoda save nie została wywołana
+    }
+
+    @Test
+    void getUserIdFromToken_ShouldThrowInvalidTokenException_WhenTokenIsInvalid() {
+        // GIVEN
+        String token = "Bearer invalid-token"; // Token z prefiksem "Bearer"
+        String jwtToken = "invalid-token"; // Token bez prefiksu
+
+        // Mockowanie jwtTokenProvider, aby rzucił wyjątek
+        when(jwtTokenProvider.getUserIdFromToken(jwtToken)).thenThrow(new InvalidTokenException("Invalid token"));
+
+        // WHEN + THEN
+        InvalidTokenException exception = assertThrows(InvalidTokenException.class, ()
+                -> userService.getUserIdFromToken(token));
+
+        assertEquals("Invalid token", exception.getMessage()); // Sprawdzamy komunikat wyjątku
+        verify(jwtTokenProvider).getUserIdFromToken(jwtToken); // Weryfikujemy, że metoda została wywołana
     }
 }
 

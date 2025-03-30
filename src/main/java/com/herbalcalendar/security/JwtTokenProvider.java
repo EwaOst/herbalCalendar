@@ -1,6 +1,7 @@
 package com.herbalcalendar.security;
 
 
+import com.herbalcalendar.exception.InvalidTokenException;
 import com.herbalcalendar.exception.JwtAuthenticationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -47,21 +48,25 @@ public class JwtTokenProvider {
                 .signWith(key, SignatureAlgorithm.HS256) // Zamiast String używamy SecretKey
                 .compact();
     }
+
     /**
      * Pobiera ID użytkownika z tokenu JWT.
      */
     public Long getUserIdFromToken(String token) {
+        if (token == null || token.isEmpty()) {
+            throw new InvalidTokenException("Token is null or empty");
+        }
         try {
             SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
 
-            String userId = Jwts.parserBuilder()
+            Claims claims = Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token)
-                    .getBody()
-                    .getSubject(); // Subject przechowuje ID użytkownika
+                    .getBody();
 
-            return Long.parseLong(userId);
+            return claims.get("userId", Long.class);
+
         } catch (JwtException e) {
             throw new JwtAuthenticationException("Invalid or expired JWT token", e);
         } catch (NumberFormatException e) {
