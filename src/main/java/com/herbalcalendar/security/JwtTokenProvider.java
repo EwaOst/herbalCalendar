@@ -1,6 +1,8 @@
 package com.herbalcalendar.security;
 
 
+import com.herbalcalendar.exception.InvalidTokenException;
+import com.herbalcalendar.exception.JwtAuthenticationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JwtTokenProvider {
@@ -18,42 +22,71 @@ public class JwtTokenProvider {
     @Value("${app.jwtExpirationInMs}")
     private int jwtExpirationInMs;
 
-    public String generateToken(String username) {
+    /**
+     * Generowanie tokenu JWT dla użytkownika.
+     * Zapisuje **ID użytkownika** jako `subject` tokenu.
+     */
+    public String generateToken(Long userId, String username) {
+        // Tworzymy claims (dane, które będą zawarte w tokenie)
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);  // Dodajemy ID użytkownika do claims
+        claims.put("username", username);  // Dodajemy nazwę użytkownika do claims
+
+        // Ustalamy czas wygaśnięcia tokenu (np. 1 godzina)
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
+        Date expiration = new Date(now.getTime() + 3600 * 1000); // 1 godzina
 
-        // Tworzenie klucza
-        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        // Tworzymy klucz podpisu z tajnego klucza
+        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());  // jwtSecret to Twój tajny klucz, np. z pliku konfiguracyjnego
 
+        // Generujemy token JWT
         return Jwts.builder()
+                .setClaims(claims)  // Dodajemy claims z userId i username
                 .setSubject(username)
                 .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(key) // Używamy nowej metody signWith z obiektem Key
+                .setExpiration(expiration)
+                .signWith(key, SignatureAlgorithm.HS256) // Zamiast String używamy SecretKey
                 .compact();
     }
 
-    public String getUsernameFromToken(String token) {
-        // Tworzenie klucza
-        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+    /**
+     * Pobiera ID użytkownika z tokenu JWT.
+     */
+    public Long getUserIdFromToken(String token) {
+        if (token == null || token.isEmpty()) {
+            throw new InvalidTokenException("Token is null or empty");
+        }
+        try {
+            SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
 
-        return Jwts.parserBuilder()
-                .setSigningKey(key) // Używamy nowej metody setSigningKey z obiektem Key
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            return claims.get("userId", Long.class);
+
+        } catch (JwtException e) {
+            throw new JwtAuthenticationException("Invalid or expired JWT token", e);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid user ID format in token", e);
+        }
     }
 
+    /**
+     * Walidacja tokenu JWT.
+     */
     public boolean validateToken(String token) {
         try {
-            SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes()); // Tworzenie klucza
+            SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+
             Jwts.parserBuilder()
-                    .setSigningKey(key) // Ustawienie klucza
+                    .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token); // Parsowanie tokenu
             return true;
-        } catch (Exception ex) {
+        } catch (JwtException ex) {
             return false;
         }
     }

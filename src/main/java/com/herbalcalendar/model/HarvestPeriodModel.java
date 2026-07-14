@@ -1,0 +1,36 @@
+package com.herbalcalendar.model;
+
+import com.herbalcalendar.enums.HarvestTime;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.List;
+
+@Getter
+@Setter
+@Embeddable
+@NoArgsConstructor
+@AllArgsConstructor
+public class HarvestPeriodModel {
+
+    @Enumerated(EnumType.STRING)
+    private HarvestTime harvestTime;
+
+    @Enumerated(EnumType.STRING)
+    private Month harvestMonth;
+
+    private String part;
+
+    public LocalDate getHarvestStartDate() {
+        return (harvestMonth != null) ? LocalDate.of(LocalDate.now().getYear(), harvestMonth, 1) : null;
+    }
+}

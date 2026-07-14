@@ -20,9 +20,6 @@ import static org.mockito.Mockito.when;
 class UserHerbServiceTest {
 
     @Mock
-    private HerbService herbService;
-
-    @Mock
     private UserHerbRepository userHerbRepository;
 
     @InjectMocks  // <-- To wstrzyknie zależności do UserHerbService

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,8 +35,12 @@ public class HerbModel {
     private ActiveCompoundEnum activeCompoundEnum;
 
     @Embedded
-    private HarvestPeriod harvestPeriod;
+    private HarvestPeriodModel harvestPeriod;
 
     @OneToMany(mappedBy = "herb", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserHerbModel> userHerbs = new ArrayList<>();
+
+    public LocalDate getHarvestStartDate() {
+        return (harvestPeriod != null) ? harvestPeriod.getHarvestStartDate() : null;
+    }
 }

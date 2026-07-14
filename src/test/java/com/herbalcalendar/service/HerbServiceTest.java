@@ -2,7 +2,7 @@ package com.herbalcalendar.service;
 
 import com.herbalcalendar.enums.ActiveCompoundEnum;
 import com.herbalcalendar.enums.HarvestTime;
-import com.herbalcalendar.model.HarvestPeriod;
+import com.herbalcalendar.model.HarvestPeriodModel;
 import com.herbalcalendar.model.HerbModel;
 import com.herbalcalendar.model.UserHerbModel;
 import com.herbalcalendar.repository.HerbRepository;
@@ -35,7 +35,7 @@ class HerbServiceTest {
 
     // Metoda pomocnicza do tworzenia HerbModel
     private HerbModel createHerbModel(Long id, String name, String latinName, String description,
-                                      ActiveCompoundEnum activeCompound, HarvestPeriod harvestPeriod) {
+                                      ActiveCompoundEnum activeCompound, HarvestPeriodModel harvestPeriod) {
         return new HerbModel(id, name, latinName, description, activeCompound, harvestPeriod, new ArrayList<>());
     }
 
@@ -44,11 +44,11 @@ class HerbServiceTest {
         // Given
         HerbModel herb1 = createHerbModel(
                 1L, "Mieta", "Mentha", "Opis miety", ActiveCompoundEnum.OLEJKI_ETERYCZNE,
-                new HarvestPeriod(HarvestTime.POCZATEK, Month.JUNE, "kwiaty"));
+                new HarvestPeriodModel(HarvestTime.POCZATEK, Month.JUNE, "kwiaty"));
 
         HerbModel herb2 = createHerbModel(
                 2L, "Nagietek", "Calendula officinalis", "Opis nagietka", ActiveCompoundEnum.FLAWONOIDY,
-                new HarvestPeriod(HarvestTime.KONIEC, Month.APRIL, "korzenie"));
+                new HarvestPeriodModel(HarvestTime.KONIEC, Month.APRIL, "korzenie"));
 
         List<HerbModel> expectedHerbs = Arrays.asList(herb1, herb2);
 
@@ -69,7 +69,7 @@ class HerbServiceTest {
         // GIVEN
         HerbModel herbModel = createHerbModel(1L, "Mięta", "Mentha", "Leczy żołądek",
                 ActiveCompoundEnum.OLEJKI_ETERYCZNE,
-                new HarvestPeriod(HarvestTime.POCZATEK, Month.JUNE, "liście"));
+                new HarvestPeriodModel(HarvestTime.POCZATEK, Month.JUNE, "liście"));
 
         // WHEN
         when(herbRepository.save(any(HerbModel.class))).thenReturn(herbModel);
@@ -92,7 +92,7 @@ class HerbServiceTest {
         // GIVEN
         HerbModel herbModel = createHerbModel(1L, "Mieta", "Mentha", "Opis miety",
                 ActiveCompoundEnum.OLEJKI_ETERYCZNE,
-                new HarvestPeriod(HarvestTime.POCZATEK, Month.JUNE, "liście"));
+                new HarvestPeriodModel(HarvestTime.POCZATEK, Month.JUNE, "liście"));
 
         when(herbRepository.findById(1L)).thenReturn(Optional.of(herbModel));
         Optional<HerbModel> result = herbService.getHerbById(1L);
@@ -108,10 +108,10 @@ class HerbServiceTest {
 
         // GIVEN
         HerbModel existingHerb = createHerbModel(herbId, "Mieta", "Mentha", "Mieta (z łac. Mentha L.) jest krzewinką szeroko rozpowszechnioną w uprawach, występującą również w stanie dzikim.",
-                ActiveCompoundEnum.OLEJKI_ETERYCZNE, new HarvestPeriod(HarvestTime.POCZATEK, Month.JULY, "kwiaty"));
+                ActiveCompoundEnum.OLEJKI_ETERYCZNE, new HarvestPeriodModel(HarvestTime.POCZATEK, Month.JULY, "kwiaty"));
 
         HerbModel updateHerb = createHerbModel(herbId, "Nagietek lekarski", "Calendula officinalis", "Nagietek lekarski jako surowiec leczniczy wykorzystywany jest w postaci kwiatów...",
-                ActiveCompoundEnum.FLAWONOIDY, new HarvestPeriod(HarvestTime.KONIEC, Month.APRIL, "korzenie"));
+                ActiveCompoundEnum.FLAWONOIDY, new HarvestPeriodModel(HarvestTime.KONIEC, Month.APRIL, "korzenie"));
 
         // WHEN
         when(herbRepository.findById(herbId)).thenReturn(Optional.of(existingHerb));
@@ -146,8 +146,8 @@ class HerbServiceTest {
         Long userId = 1L;
 
         // Przygotowanie danych testowych
-        HerbModel herb1 = createHerbModel(1L, "Mięta", "Mentha", "Opis miety", ActiveCompoundEnum.OLEJKI_ETERYCZNE, new HarvestPeriod(HarvestTime.POCZATEK, Month.JUNE, "kwiaty"));
-        HerbModel herb2 = createHerbModel(2L, "Rumianek", "Calendula officinalis", "Opis rumianku", ActiveCompoundEnum.FLAWONOIDY, new HarvestPeriod(HarvestTime.KONIEC, Month.APRIL, "korzenie"));
+        HerbModel herb1 = createHerbModel(1L, "Mięta", "Mentha", "Opis miety", ActiveCompoundEnum.OLEJKI_ETERYCZNE, new HarvestPeriodModel(HarvestTime.POCZATEK, Month.JUNE, "kwiaty"));
+        HerbModel herb2 = createHerbModel(2L, "Rumianek", "Calendula officinalis", "Opis rumianku", ActiveCompoundEnum.FLAWONOIDY, new HarvestPeriodModel(HarvestTime.KONIEC, Month.APRIL, "korzenie"));
 
         UserHerbModel userHerb1 = new UserHerbModel();
         userHerb1.setHerb(herb1);

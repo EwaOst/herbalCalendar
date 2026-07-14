@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -18,6 +19,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,8 +40,7 @@ class HerbControllerTest {
     @MockBean
     private HerbService herbService;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void getAllHerbs_ShouldReturnHerbListAndStatusOk() throws Exception {
@@ -122,6 +124,26 @@ class HerbControllerTest {
         mockMvc.perform(delete("/herbs/{id}", herbId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockUser(username = "user")
+    void getHerbsByUserId_ShouldReturnListOfHerbs() throws Exception {
+        // GIVEN
+        Long userId = 1L;
+
+        List<HerbModel> herbs = Arrays.asList(
+                new HerbModel(1L, "Basil", "Ocimum basilicum", "Aromatic herb", null, null, new ArrayList<>()),
+                new HerbModel(2L, "Mint", "Mentha", "Cooling herb", null, null, new ArrayList<>())
+        );
+
+        when(herbService.getHerbsByUserId(userId)).thenReturn(herbs);
+
+        // WHEN & THEN
+        mockMvc.perform(get("/herbs/{userId}/herbs", userId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(herbs)));
     }
 }
 
